@@ -1,0 +1,100 @@
+package application;
+
+import java.awt.BorderLayout;
+import java.awt.Graphics;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class application {
+
+	private static class MainMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("This is the menu", 20, 30);
+		}
+	}
+
+	private static class SearchMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("Hello World!", 20, 30);
+		}
+	}
+
+	private static class RateMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("Hello World!", 20, 30);
+		}
+	}
+
+	private static class UserMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("Hello World!", 20, 30);
+		}
+	}
+
+	private static class LeaderMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("Hello World!", 20, 30);
+		}
+	}
+
+	private static class LoginMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("This is the login page", 20, 30);
+		}
+	}
+
+	private static class ButtonHandler implements ActionListener {
+		String type;
+
+		public ButtonHandler(String t) {
+			type = t;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			switch (type) {
+			case "close":
+				System.exit(0);
+			case "toLogin":
+
+			default:
+				System.exit(0);
+			}
+
+		}
+	}
+
+	static JPanel menu = new JPanel();
+
+	public static void main(String[] args) {
+
+		JPanel displayPanel = new MainMenu();
+		JButton loginButton = new JButton("Login");
+		ButtonHandler loginListener = new ButtonHandler("toLogin");
+		loginButton.addActionListener(loginListener);
+		JButton closeButton = new JButton("Close");
+		ButtonHandler closeListener = new ButtonHandler("close");
+		loginButton.addActionListener(closeListener);
+
+		menu = new JPanel();
+		menu.setLayout(new BorderLayout());
+		menu.add(displayPanel, BorderLayout.CENTER);
+		menu.add(loginButton, BorderLayout.EAST);
+		menu.add(closeButton, BorderLayout.SOUTH);
+
+		JFrame window = new JFrame("GUI Test");
+		window.setContentPane(menu);
+		window.setSize(500, 200);
+		window.setLocation(100, 100);
+		window.setVisible(true);
+
+	}
+}
