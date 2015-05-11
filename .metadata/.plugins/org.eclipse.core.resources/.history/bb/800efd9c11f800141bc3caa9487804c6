@@ -144,14 +144,6 @@ public class application {
 		ButtonHandler logoutListener = new ButtonHandler("toMenu");
 		logoutButton.addActionListener(logoutListener);
 		
-		JButton searchButton = new JButton("Search");
-		ButtonHandler searchListener = new ButtonHandler("toSearch");
-		searchButton.addActionListener(searchListener);
-		
-		JButton optionsButton = new JButton("Options");
-		ButtonHandler optionsListener = new ButtonHandler("toOptions");
-		optionsButton.addActionListener(optionsListener);
-		
 		//Create Menu Panel
 		mainMenu = new JPanel();
 		mainMenu.setLayout(new BoxLayout(mainMenu, BoxLayout.PAGE_AXIS));
@@ -175,9 +167,6 @@ public class application {
 		userMenu = new JPanel();
 		userMenu.setLayout(new BoxLayout(userMenu, BoxLayout.Y_AXIS));
 		userMenu.add(userPanel);
-		userMenu.add(Box.createVerticalGlue());
-		userMenu.add(searchButton);
-		userMenu.add(optionsButton);
 		userMenu.add(logoutButton);
 		
 		//Generate Window

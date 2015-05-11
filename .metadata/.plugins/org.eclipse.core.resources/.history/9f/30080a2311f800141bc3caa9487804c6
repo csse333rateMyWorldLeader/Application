@@ -42,7 +42,7 @@ public class application {
 	private static class UserMenu extends JPanel {
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			g.drawString("This is the user menu for " + username +".", 20, 30);
+			g.drawString("This is the user menu for" + username +".", 20, 30);
 		}
 	}
 
@@ -144,14 +144,6 @@ public class application {
 		ButtonHandler logoutListener = new ButtonHandler("toMenu");
 		logoutButton.addActionListener(logoutListener);
 		
-		JButton searchButton = new JButton("Search");
-		ButtonHandler searchListener = new ButtonHandler("toSearch");
-		searchButton.addActionListener(searchListener);
-		
-		JButton optionsButton = new JButton("Options");
-		ButtonHandler optionsListener = new ButtonHandler("toOptions");
-		optionsButton.addActionListener(optionsListener);
-		
 		//Create Menu Panel
 		mainMenu = new JPanel();
 		mainMenu.setLayout(new BoxLayout(mainMenu, BoxLayout.PAGE_AXIS));
@@ -164,7 +156,7 @@ public class application {
 		loginMenu.setLayout(new BoxLayout(loginMenu, BoxLayout.Y_AXIS));
 		loginMenu.add(menuButton);
 		loginMenu.add(loginPanel);
-		loginMenu.add(Box.createVerticalGlue());
+		loginMenu.add(Box.createHorizontalGlue());
 		userField.setMaximumSize(new Dimension(300,15));
 		passField.setMaximumSize(new Dimension(300,15));
 		loginMenu.add(userField);
@@ -175,9 +167,6 @@ public class application {
 		userMenu = new JPanel();
 		userMenu.setLayout(new BoxLayout(userMenu, BoxLayout.Y_AXIS));
 		userMenu.add(userPanel);
-		userMenu.add(Box.createVerticalGlue());
-		userMenu.add(searchButton);
-		userMenu.add(optionsButton);
 		userMenu.add(logoutButton);
 		
 		//Generate Window
