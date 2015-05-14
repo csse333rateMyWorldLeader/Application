@@ -15,6 +15,13 @@ import javax.swing.JTextField;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Properties;
 
 public class application {
 
@@ -59,6 +66,13 @@ public class application {
 			g.drawString("Enter your Username and Password", 20, 30);
 		}
 	}
+	
+	private static class LoginMenuErr extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("Invalid Username and/or Password", 20, 30);
+		}
+	}
 
 	private static class ButtonHandler implements ActionListener {
 		String type;
@@ -87,11 +101,13 @@ public class application {
 				window.setVisible(true);
 				break;
 			case "login":
-				//TODO: Add stuff to actually check inputed
-				//		password and username and THEN go to
-				//		user page
-				if(userField.getText().equals("FiniteZ")
-						&& passField.getText().equals("moom1232"))
+				try {
+					CallableStatement cs = con.prepareCall("EXEC loginsp '"
+							+ userField.getText()+"', '"
+							+ passField.getText()+"'");
+					ResultSet res = cs.executeQuery();
+				
+				if(res.next() && res.getString(1).equals("1"))
 				{
 					username = userField.getText();
 					System.out.println("You did it!");
@@ -102,28 +118,38 @@ public class application {
 				}
 				else
 				{
-					System.out.println("You failed.");
+					throw new Error();
 				}
-				
+				} catch (Exception e1) {
+					System.out.println("You failed.");
+					userField.setText("Invalid user/password");
+				}
 				break;
 			}
 
 		}
 	}
+	
+	static Connection con;
+	static Statement statement;
 
 	static JPanel mainMenu = new JPanel();
 	static JPanel loginMenu = new JPanel();
 	static JPanel userMenu = new JPanel();
+	static JPanel loginMenuErr = new JPanel();
 	static JFrame window = new JFrame("GUI Test");
 	static JTextField userField = new JTextField();
 	static String username = "";
 	static JTextField passField = new JPasswordField();
 
 	public static void main(String[] args) {
+		
+		connectToDatabase();
 
 		JPanel menuPanel = new MainMenu();
 		JPanel loginPanel = new LoginMenu();
 		JPanel userPanel = new UserMenu();
+		JPanel loginPanelErr = new LoginMenuErr();
 		
 		JButton loginButton = new JButton("Login");
 		ButtonHandler loginListener = new ButtonHandler("toLogin");
@@ -187,5 +213,26 @@ public class application {
 		window.setLocation(100, 100);
 		window.setVisible(true);
 
+	}
+
+	private static void connectToDatabase() {
+		String host = "jdbc:sqlserver://titan.csse.rose-hulman.edu;databaseName=RateYourWorldLeader";
+		Properties connectionProps = new Properties();
+	    connectionProps.put("user", "hamiltjc");
+	    connectionProps.put("password", "moom1232");
+		try {
+			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			con = DriverManager.getConnection(host, connectionProps);
+			statement = con.createStatement();
+	        // String queryString = "select * from Leader";
+	        // ResultSet rs = statement.executeQuery(queryString);
+	        // while (rs.next()) {
+	        //  System.out.println(rs.getString(4));
+	        // }
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.exit(0);
+		}
+		
 	}
 }
