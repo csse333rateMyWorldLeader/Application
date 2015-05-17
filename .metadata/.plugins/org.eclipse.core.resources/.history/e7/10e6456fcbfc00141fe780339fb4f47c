@@ -74,8 +74,6 @@ public class application {
 		}
 	}
 
-	//Because I am such a fantastic coder, and Java's swing is so silly
-	//here is a single action
 	private static class ButtonHandler implements ActionListener {
 		String type;
 
@@ -84,7 +82,6 @@ public class application {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			
 			switch (type) {
 			case "close":
 				System.exit(0);
@@ -126,7 +123,6 @@ public class application {
 				} catch (Exception e1) {
 					System.out.println("You failed.");
 					userField.setText("Invalid user/password");
-					passField.setText("");
 				}
 				break;
 			}
@@ -148,33 +144,50 @@ public class application {
 
 	public static void main(String[] args) {
 		
-		//Connect to the database, any failure to do so results in the closing of the application
 		connectToDatabase();
-		
-		//Create all the panels upon startup, all button related items are indented to increase readability
+
 		JPanel menuPanel = new MainMenu();
 		JPanel loginPanel = new LoginMenu();
 		JPanel userPanel = new UserMenu();
+		JPanel loginPanelErr = new LoginMenuErr();
+		
+		JButton loginButton = new JButton("Login");
+		ButtonHandler loginListener = new ButtonHandler("toLogin");
+		loginButton.addActionListener(loginListener);
+		JButton loginButton2 = new JButton("Login");
+		ButtonHandler loginListener2 = new ButtonHandler("login");
+		loginButton2.addActionListener(loginListener2);
+		
+		JButton closeButton = new JButton("Close");
+		ButtonHandler closeListener = new ButtonHandler("close");
+		closeButton.addActionListener(closeListener);
+
+		JButton menuButton = new JButton("Menu");
+		ButtonHandler menuListener = new ButtonHandler("toMenu");
+		menuButton.addActionListener(menuListener);
+		
+		JButton logoutButton = new JButton("Logout");
+		ButtonHandler logoutListener = new ButtonHandler("toMenu");
+		logoutButton.addActionListener(logoutListener);
+		
+		JButton searchButton = new JButton("Search");
+		ButtonHandler searchListener = new ButtonHandler("toSearch");
+		searchButton.addActionListener(searchListener);
+		
+		JButton optionsButton = new JButton("Options");
+		ButtonHandler optionsListener = new ButtonHandler("toOptions");
+		optionsButton.addActionListener(optionsListener);
 		
 		//Create Menu Panel
 		mainMenu = new JPanel();
 		mainMenu.setLayout(new BoxLayout(mainMenu, BoxLayout.PAGE_AXIS));
 		mainMenu.add(menuPanel);
-			JButton loginButton = new JButton("Login");
-			ButtonHandler loginListener = new ButtonHandler("toLogin");
-			loginButton.addActionListener(loginListener);
 		mainMenu.add(loginButton);
-			JButton closeButton = new JButton("Close");
-			ButtonHandler closeListener = new ButtonHandler("close");
-			closeButton.addActionListener(closeListener);
 		mainMenu.add(closeButton);
 		
 		//Create Login Panel
 		loginMenu = new JPanel();
 		loginMenu.setLayout(new BoxLayout(loginMenu, BoxLayout.Y_AXIS));
-			JButton menuButton = new JButton("Menu");
-			ButtonHandler menuListener = new ButtonHandler("toMenu");
-			menuButton.addActionListener(menuListener);
 		loginMenu.add(menuButton);
 		loginMenu.add(loginPanel);
 		loginMenu.add(Box.createVerticalGlue());
@@ -182,9 +195,6 @@ public class application {
 		passField.setMaximumSize(new Dimension(300,15));
 		loginMenu.add(userField);
 		loginMenu.add(passField);
-			JButton loginButton2 = new JButton("Login");
-			ButtonHandler loginListener2 = new ButtonHandler("login");
-			loginButton2.addActionListener(loginListener2);
 		loginMenu.add(loginButton2);
 
 		//Create User Menu
@@ -192,17 +202,8 @@ public class application {
 		userMenu.setLayout(new BoxLayout(userMenu, BoxLayout.Y_AXIS));
 		userMenu.add(userPanel);
 		userMenu.add(Box.createVerticalGlue());
-			JButton searchButton = new JButton("Search");
-			ButtonHandler searchListener = new ButtonHandler("toSearch");
-			searchButton.addActionListener(searchListener);
 		userMenu.add(searchButton);
-			JButton optionsButton = new JButton("Options");
-			ButtonHandler optionsListener = new ButtonHandler("toOptions");
-			optionsButton.addActionListener(optionsListener);
 		userMenu.add(optionsButton);
-			JButton logoutButton = new JButton("Logout");
-			ButtonHandler logoutListener = new ButtonHandler("toMenu");
-			logoutButton.addActionListener(logoutListener);
 		userMenu.add(logoutButton);
 		
 		//Generate Window
@@ -223,6 +224,11 @@ public class application {
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			con = DriverManager.getConnection(host, connectionProps);
 			statement = con.createStatement();
+	        // String queryString = "select * from Leader";
+	        // ResultSet rs = statement.executeQuery(queryString);
+	        // while (rs.next()) {
+	        //  System.out.println(rs.getString(4));
+	        // }
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.exit(0);
