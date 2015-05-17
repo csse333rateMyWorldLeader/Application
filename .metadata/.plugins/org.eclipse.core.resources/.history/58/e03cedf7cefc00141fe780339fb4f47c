@@ -35,7 +35,7 @@ public class application {
 	private static class SearchMenu extends JPanel {
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			g.drawString("This is the search menu", 20, 30);
+			g.drawString("Hello World!", 20, 30);
 		}
 	}
 
@@ -49,14 +49,14 @@ public class application {
 	private static class UserMenu extends JPanel {
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			g.drawString("This is the user menu for " + username, 20, 30);
+			g.drawString("This is the user menu for " + username +".", 20, 30);
 		}
 	}
 
 	private static class LeaderMenu extends JPanel {
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			g.drawString("This is the leader menu for David", 20, 30);
+			g.drawString("Hello World!", 20, 30);
 		}
 	}
 
@@ -67,10 +67,10 @@ public class application {
 		}
 	}
 	
-	private static class OptionsMenu extends JPanel {
+	private static class LoginMenuErr extends JPanel {
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			g.drawString("This is the options menu", 20, 30);
+			g.drawString("Invalid Username and/or Password", 20, 30);
 		}
 	}
 
@@ -113,8 +113,6 @@ public class application {
 				if(res.next() && res.getString(1).equals("1"))
 				{
 					username = userField.getText();
-					userField.setText("");
-					passField.setText("");
 					System.out.println("You did it!");
 					window.setContentPane(userMenu);
 					window.setSize(300, 200);
@@ -142,8 +140,7 @@ public class application {
 	static JPanel mainMenu = new JPanel();
 	static JPanel loginMenu = new JPanel();
 	static JPanel userMenu = new JPanel();
-	static JPanel searchMenu = new JPanel();
-	static JPanel optionsMenu = new JPanel();
+	static JPanel loginMenuErr = new JPanel();
 	static JFrame window = new JFrame("GUI Test");
 	static JTextField userField = new JTextField();
 	static String username = "";
@@ -158,8 +155,6 @@ public class application {
 		JPanel menuPanel = new MainMenu();
 		JPanel loginPanel = new LoginMenu();
 		JPanel userPanel = new UserMenu();
-		JPanel searchPanel = new SearchMenu();
-		JPanel optionsPanel = new OptionsMenu();
 		
 		//Create Menu Panel
 		mainMenu = new JPanel();
@@ -209,33 +204,6 @@ public class application {
 			ButtonHandler logoutListener = new ButtonHandler("toMenu");
 			logoutButton.addActionListener(logoutListener);
 		userMenu.add(logoutButton);
-		
-		//Create createUser Menu
-		//TODO allows new user to be created
-		
-		//Create Search Menu
-		//TODO allow user to search other users, leaders, states, countries
-		
-		//Create Options Menu
-		//TODO give the user ability to change password or delete account
-		
-		//Create Leader Menu
-		//TODO display overall rating as well as a list of current ratings
-		
-		//Create Rating Menu
-		//TODO allow entry of text to rate a leader
-		
-		//Create otherUser Menu
-		//TODO should allow current user to view another users account
-		
-		//Create adminUser Menu
-		//TODO same as user, but has extra options
-		
-		//Create adminOptions Menu
-		//TODO has extra options for admin
-		
-		//Create adminOtherUser Menu
-		//TODO extra options for admin
 		
 		//Generate Window
 		window = new JFrame("Rate My World Leader");
