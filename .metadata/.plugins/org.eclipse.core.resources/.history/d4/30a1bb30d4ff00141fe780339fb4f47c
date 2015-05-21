@@ -227,7 +227,7 @@ public class application {
 				break;
 			case "createUser":
 				System.out.println("Woo?");
-				// TODO add user to database
+				// TODO
 				break;
 			case "search":
 				CallableStatement cs;
@@ -285,9 +285,6 @@ public class application {
 						leaderMenu.add(exitButton);
 						leaderWindow = new JFrame(currLeader);
 						//TODO Implement the JTable
-						cs = con.prepareCall("SELECT username, rating, txt FROM UserRatings "
-								+ "WHERE ");
-						//TODO Implement the JTable
 						leaderWindow.setContentPane(leaderMenu);
 						leaderWindow.setSize(500, 400);
 						leaderWindow.setLocation(110, 110);
@@ -298,6 +295,7 @@ public class application {
 						searchFieldL.setText("");
 					}
 				} else if (searchType.equals("User")) {
+					// TODO do a user search
 					try {
 						cs = con.prepareCall("SELECT username, lname, rating FROM UserRatings "
 								+ "WHERE username = '" + searchFieldF.getText() + "'");
@@ -329,10 +327,6 @@ public class application {
 						searchFieldL.setText("");
 					}
 				}
-				break;
-			case "rate":
-				//TODO make rating add to database
-				break;
 			}
 
 		}
@@ -376,7 +370,8 @@ public class application {
 		// of the application
 		connectToDatabase();
 
-		// Create all the panels upon startup
+		// Create all the panels upon startup, all button related items are
+		// indented to increase readability
 		JPanel menuPanel = new MainMenu();
 		JPanel loginPanel = new LoginMenu();
 		JPanel userPanel = new UserMenu();
