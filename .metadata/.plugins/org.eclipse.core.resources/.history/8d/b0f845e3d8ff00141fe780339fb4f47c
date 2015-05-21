@@ -1,6 +1,6 @@
 package application;
 
-//Currently at 9 hours of actual work on this
+//Currently at 7.5 hours of actual work on this
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -17,7 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -91,13 +90,6 @@ public class application {
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			g.drawString("This is the options menu", 20, 30);
-		}
-	}
-	
-	private static class OtherUserMenu extends JPanel {
-		public void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			g.drawString("This is the User menu for " + otherUsername, 20, 30);
 		}
 	}
 
@@ -292,27 +284,10 @@ public class application {
 						exitButton.addActionListener(exitListener);
 						leaderMenu.add(exitButton);
 						leaderWindow = new JFrame(currLeader);
+						//TODO Implement the JTable
 						cs = con.prepareCall("SELECT username, rating, txt FROM UserRatings "
-								+ "WHERE leader_id = " + leaderID);
-						ResultSet res3 = cs.executeQuery();
-						String[] columnNames = {"Username", "Rating", "Text"};
-						ArrayList<String[]> dataArrayList = new ArrayList<String[]>();
-						while(res3.next()) {
-							String[] temp = new String[3];
-							temp[0] = res3.getString(1);
-							temp[1] = res3.getString(2);
-							temp[2] = res3.getString(3);
-							dataArrayList.add(temp);
-						}
-						String[][] data = new String[dataArrayList.size()][3];
-						for(int x = 0; x < dataArrayList.size(); x++)
-						{
-							data[x] = dataArrayList.get(x);
-						}
-						JTable table = new JTable(data, columnNames);
-						JScrollPane scrollPane = new JScrollPane(table);
-						table.setPreferredScrollableViewportSize(new Dimension(300, 100));
-						leaderMenu.add(scrollPane);
+								+ "WHERE ");
+						//TODO Implement the JTable
 						leaderWindow.setContentPane(leaderMenu);
 						leaderWindow.setSize(500, 400);
 						leaderWindow.setLocation(110, 110);
@@ -335,38 +310,16 @@ public class application {
 						System.out.println(otherUsername);
 						otherUserMenu = new JPanel();
 						otherUserMenu.setLayout(new BoxLayout(otherUserMenu, BoxLayout.Y_AXIS));
-						JPanel otherUserPanel = new OtherUserMenu();
-						otherUserMenu.add(otherUserPanel);
-						JButton exitButton6 = new JButton("Close");
-						ButtonHandler exitListener6 = new ButtonHandler("exitWindowUser");
-						exitButton6.addActionListener(exitListener6);
-						otherUserMenu.add(exitButton6);
+						JPanel leaderPanel = new LeaderMenu();
+						otherUserMenu.add(leaderPanel);
+						JButton exitButton = new JButton("Close");
+						ButtonHandler exitListener = new ButtonHandler("exitWindowUser");
+						exitButton.addActionListener(exitListener);
+						otherUserMenu.add(exitButton);
 						otherUserWindow = new JFrame(otherUsername);
-						cs = con.prepareCall("SELECT fname, midint, lname, rating, txt FROM UserRatings "
-								+ "WHERE username = '" + otherUsername + "'");
-						ResultSet res3 = cs.executeQuery();
-						String[] columnNames = {"First Name", "Middle Initial", "Last Name", "Rating", "Text"};
-						ArrayList<String[]> dataArrayList = new ArrayList<String[]>();
-						while(res3.next()) {
-							String[] temp = new String[5];
-							temp[0] = res3.getString(1);
-							temp[1] = res3.getString(2);
-							temp[2] = res3.getString(3);
-							temp[3] = res3.getString(4);
-							temp[4] = res3.getString(5);
-							dataArrayList.add(temp);
-						}
-						String[][] data = new String[dataArrayList.size()][3];
-						for(int x = 0; x < dataArrayList.size(); x++)
-						{
-							data[x] = dataArrayList.get(x);
-						}
-						JTable table = new JTable(data, columnNames);
-						JScrollPane scrollPane = new JScrollPane(table);
-						table.setPreferredScrollableViewportSize(new Dimension(300, 100));
-						otherUserMenu.add(scrollPane);
+						//TODO Implement the JTable
 						otherUserWindow.setContentPane(otherUserMenu);
-						otherUserWindow.setSize(500, 400);
+						otherUserWindow.setSize(300, 200);
 						otherUserWindow.setLocation(110, 110);
 						otherUserWindow.setVisible(true);
 					} catch (Exception e1) {
