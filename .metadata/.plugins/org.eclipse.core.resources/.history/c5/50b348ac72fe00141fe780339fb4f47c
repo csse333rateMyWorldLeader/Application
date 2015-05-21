@@ -1,0 +1,390 @@
+package application;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JRadioButton;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.table.TableColumn;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+public class application {
+
+	private static class MainMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("This is the menu", 20, 30);
+		}
+	}
+
+	private static class SearchMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("This is the search menu.", 20, 30);
+		}
+	}
+
+	private static class RateMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("Hello World!", 20, 30);
+		}
+	}
+
+	private static class CreateUserMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("Please enter a username, email, password.", 20, 30);
+		}
+	}
+
+	private static class UserMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("This is the user menu for " + username, 20, 30);
+		}
+	}
+
+	private static class LeaderMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("This is the leader menu for " + currLeader, 20, 30);
+		}
+	}
+
+	private static class LoginMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("Enter your Username and Password", 20, 30);
+		}
+	}
+
+	private static class OptionsMenu extends JPanel {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.drawString("This is the options menu", 20, 30);
+		}
+	}
+
+	// Because I am such a fantastic coder, and Java's swing is so silly
+	// here is a single action
+	private static class ButtonHandler implements ActionListener {
+		String type;
+
+		public ButtonHandler(String t) {
+			type = t;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+			switch (type) {
+			case "close":
+				System.exit(0);
+				break;
+			case "toLogin":
+				System.out.println("login");
+				window.setContentPane(loginMenu);
+				window.setSize(300, 200);
+				window.setLocation(100, 100);
+				window.setVisible(true);
+				break;
+			case "toMenu":
+				System.out.println("menu");
+				window.setContentPane(mainMenu);
+				window.setSize(300, 200);
+				window.setLocation(100, 100);
+				window.setVisible(true);
+				break;
+			case "toNewUser":
+				System.out.println("newUser");
+				window.setContentPane(createUserMenu);
+				newUserField.setText("Username");
+				emailField.setText("Email");
+				newPassField.setText("Password");
+				newPassConfirmField.setText("Confirm Password");
+				window.setSize(400, 300);
+				window.setLocation(100, 100);
+				window.setVisible(true);
+				break;
+			case "toSearch":
+				System.out.println("searchMenu");
+				window.setContentPane(searchMenu);
+				window.setSize(500, 400);
+				window.setLocation(100, 100);
+				window.setVisible(true);
+				break;
+			case "toUser":
+				window.setContentPane(userMenu);
+				window.setSize(300, 200);
+				window.setLocation(100, 100);
+				window.setVisible(true);
+				break;
+			case "radio1":
+				searchType = "Leader";
+				break;
+			case "radio2":
+				searchType = "User";
+				break;
+			case "radio3":
+				searchType = "Location";
+				break;
+			case "login":
+				try {
+					CallableStatement cs = con.prepareCall("EXEC loginsp '"
+							+ userField.getText() + "', '"
+							+ passField.getText() + "'");
+					ResultSet res = cs.executeQuery();
+
+					if (res.next() && res.getString(1).equals("1")) {
+						username = userField.getText();
+						userField.setText("");
+						passField.setText("");
+						System.out.println("You did it!");
+						window.setContentPane(userMenu);
+						window.setSize(300, 200);
+						window.setLocation(100, 100);
+						window.setVisible(true);
+					} else {
+						throw new Error();
+					}
+				} catch (Exception e1) {
+					System.out.println("You failed.");
+					userField.setText("Invalid user/password");
+					passField.setText("");
+				}
+				break;
+			case "createUser":
+				System.out.println("Woo?");
+				// TODO Make users yo, cry rivers, RIVER!
+				break;
+			case "search":
+				System.out.println(searchType + " : " + searchFieldF.getText());
+				CallableStatement cs;
+				try {
+					cs = con.prepareCall("SELECT * FROM LEADER WHERE ");
+					ResultSet res = cs.executeQuery();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+				
+			}
+
+		}
+	}
+
+	static Connection con;
+	static Statement statement;
+
+	static JPanel mainMenu = new JPanel();
+	static JPanel loginMenu = new JPanel();
+	static JPanel userMenu = new JPanel();
+	static JPanel searchMenu = new JPanel();
+	static JPanel optionsMenu = new JPanel();
+	static JPanel createUserMenu = new JPanel();
+	static JFrame window = new JFrame("GUI Test");
+	static JTextField userField = new JTextField();
+	static String username = "";
+	static JTextField passField = new JPasswordField();
+	static JTextField newUserField = new JTextField();
+	static JTextField emailField = new JTextField();
+	static JTextField newPassField = new JTextField();
+	static JTextField newPassConfirmField = new JTextField();
+	static String currLeader = "";
+	static JTextField searchFieldF = new JTextField();
+	static JTextField searchFieldM = new JTextField();
+	static JTextField searchFieldL = new JTextField();
+	static String searchType = "";
+
+	public static void main(String[] args) {
+
+		// Connect to the database, any failure to do so results in the closing
+		// of the application
+		connectToDatabase();
+
+		// Create all the panels upon startup, all button related items are
+		// indented to increase readability
+		JPanel menuPanel = new MainMenu();
+		JPanel loginPanel = new LoginMenu();
+		JPanel userPanel = new UserMenu();
+		JPanel searchPanel = new SearchMenu();
+		JPanel optionsPanel = new OptionsMenu();
+		JPanel createUserPanel = new CreateUserMenu();
+
+		// Create Menu Panel
+		mainMenu = new JPanel();
+		mainMenu.setLayout(new BoxLayout(mainMenu, BoxLayout.PAGE_AXIS));
+		mainMenu.add(menuPanel);
+		JButton loginButton = new JButton("Login");
+		ButtonHandler loginListener = new ButtonHandler("toLogin");
+		loginButton.addActionListener(loginListener);
+		mainMenu.add(loginButton);
+		JButton newUserButton = new JButton("New User");
+		ButtonHandler newUserListener = new ButtonHandler("toNewUser");
+		newUserButton.addActionListener(newUserListener);
+		mainMenu.add(newUserButton);
+		JButton closeButton = new JButton("Close");
+		ButtonHandler closeListener = new ButtonHandler("close");
+		closeButton.addActionListener(closeListener);
+		mainMenu.add(closeButton);
+
+		// Create Login Panel
+		loginMenu = new JPanel();
+		loginMenu.setLayout(new BoxLayout(loginMenu, BoxLayout.Y_AXIS));
+		JButton menuButton = new JButton("Back");
+		ButtonHandler menuListener = new ButtonHandler("toMenu");
+		menuButton.addActionListener(menuListener);
+		loginMenu.add(menuButton);
+		loginMenu.add(loginPanel);
+		loginMenu.add(Box.createVerticalGlue());
+		userField.setMaximumSize(new Dimension(300, 15));
+		passField.setMaximumSize(new Dimension(300, 15));
+		loginMenu.add(userField);
+		loginMenu.add(passField);
+		JButton loginButton2 = new JButton("Login");
+		ButtonHandler loginListener2 = new ButtonHandler("login");
+		loginButton2.addActionListener(loginListener2);
+		loginMenu.add(loginButton2);
+
+		// Create User Menu
+		userMenu = new JPanel();
+		userMenu.setLayout(new BoxLayout(userMenu, BoxLayout.Y_AXIS));
+		userMenu.add(userPanel);
+		userMenu.add(Box.createVerticalGlue());
+		JButton searchButton = new JButton("Search");
+		ButtonHandler searchListener = new ButtonHandler("toSearch");
+		searchButton.addActionListener(searchListener);
+		userMenu.add(searchButton);
+		JButton optionsButton = new JButton("Options");
+		ButtonHandler optionsListener = new ButtonHandler("toOptions");
+		optionsButton.addActionListener(optionsListener);
+		userMenu.add(optionsButton);
+		JButton logoutButton = new JButton("Logout");
+		ButtonHandler logoutListener = new ButtonHandler("toMenu");
+		logoutButton.addActionListener(logoutListener);
+		userMenu.add(logoutButton);
+
+		// Create createUser Menu
+		createUserMenu = new JPanel();
+		createUserMenu.setLayout(new BoxLayout(createUserMenu, BoxLayout.Y_AXIS));
+		createUserMenu.add(createUserPanel);
+		createUserMenu.add(newUserField);
+		createUserMenu.add(emailField);
+		createUserMenu.add(newPassField);
+		createUserMenu.add(newPassConfirmField);
+		newUserField.setMaximumSize(new Dimension(300, 15));
+		emailField.setMaximumSize(new Dimension(300, 15));
+		newPassField.setMaximumSize(new Dimension(300, 15));
+		newPassConfirmField.setMaximumSize(new Dimension(300, 15));
+		createUserMenu.add(Box.createVerticalGlue());
+		JButton createUserButton = new JButton("Create User");
+		ButtonHandler createUserListener = new ButtonHandler("createUser");
+		createUserButton.addActionListener(createUserListener);
+		createUserMenu.add(createUserButton);
+		JButton backButton = new JButton("Back");
+		ButtonHandler backListener = new ButtonHandler("toMenu");
+		backButton.addActionListener(backListener);
+		createUserMenu.add(backButton);
+
+		// Create Search Menu
+		searchMenu = new JPanel();
+		searchMenu.setLayout(new BoxLayout(searchMenu, BoxLayout.Y_AXIS));
+		searchMenu.add(searchPanel);
+		searchMenu.add(searchFieldF);
+		searchFieldF.setMaximumSize(new Dimension(3000, 15));
+		searchMenu.add(searchFieldM);
+		searchFieldM.setMaximumSize(new Dimension(3000, 15));
+		searchMenu.add(searchFieldL);
+		searchFieldL.setMaximumSize(new Dimension(3000, 15));
+		JPanel option = new JPanel(new GridLayout(1, 0));
+		JRadioButton leaderButton = new JRadioButton("Leader");
+		ButtonHandler radioListener = new ButtonHandler("radio1");
+		leaderButton.addActionListener(radioListener);
+		JRadioButton UserButton = new JRadioButton("User");
+		ButtonHandler radioListener2 = new ButtonHandler("radio2");
+		UserButton.addActionListener(radioListener2);
+		ButtonGroup group = new ButtonGroup();
+		group.add(leaderButton);
+		group.add(UserButton);
+		option.add(leaderButton);
+		option.add(UserButton);
+		searchMenu.add(option);
+		JButton searchButton2 = new JButton("Search");
+		ButtonHandler searchListener2 = new ButtonHandler("search");
+		searchButton2.addActionListener(searchListener2);
+		searchMenu.add(searchButton2);
+		searchMenu.add(Box.createVerticalGlue());
+		JButton backButton2 = new JButton("Back");
+		ButtonHandler backListener2 = new ButtonHandler("toUser");
+		backButton2.addActionListener(backListener2);
+		searchMenu.add(backButton2);
+
+		// Create Options Menu
+		// TODO give the user ability to change password or delete account
+
+		// Create Leader Menu
+		// TODO display overall rating as well as a list of current ratings
+
+		// Create Rating Menu
+		// TODO allow entry of text to rate a leader
+
+		// Create otherUser Menu
+		// TODO should allow current user to view another users account
+
+		// Create adminUser Menu
+		// TODO same as user, but has extra options
+
+		// Create adminOptions Menu
+		// TODO has extra options for admin
+
+		// Create adminOtherUser Menu
+		// TODO extra options for admin
+
+		// Generate Window
+		window = new JFrame("Rate My World Leader");
+		window.setContentPane(mainMenu);
+		window.setSize(300, 200);
+		window.setLocation(100, 100);
+		window.setVisible(true);
+
+	}
+
+	private static void connectToDatabase() {
+		String host = "jdbc:sqlserver://titan.csse.rose-hulman.edu;databaseName=RateYourWorldLeader";
+		Properties connectionProps = new Properties();
+		connectionProps.put("user", "hamiltjc");
+		connectionProps.put("password", "moom1232");
+		try {
+			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			con = DriverManager.getConnection(host, connectionProps);
+			statement = con.createStatement();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.exit(0);
+		}
+
+	}
+}

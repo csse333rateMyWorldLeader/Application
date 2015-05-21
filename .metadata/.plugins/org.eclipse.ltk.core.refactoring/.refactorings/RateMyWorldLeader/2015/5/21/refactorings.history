@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename field &apos;searchField&apos; in &apos;application.application&apos; to &apos;searchFieldF&apos;&#x0D;&#x0A;- Original project: &apos;RateMyWorldLeader&apos;&#x0D;&#x0A;- Original element: &apos;application.application.searchField&apos;&#x0D;&#x0A;- Renamed element: &apos;application.application.searchFieldF&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" delegate="false" deprecate="false" description="Rename field &apos;searchField&apos;" flags="589830" getter="false" id="org.eclipse.jdt.ui.rename.field" input="/src&lt;application{application.java[application^searchField" name="searchFieldF" references="true" setter="false" stamp="1432072512194" textual="false" version="1.0"/>
+</session>
