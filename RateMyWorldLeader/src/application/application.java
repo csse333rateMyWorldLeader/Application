@@ -1,9 +1,7 @@
 package application;
 
-//Currently at 9 hours of actual work on this
+//Currently at 12 hours of actual work on this
 
-import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
@@ -16,24 +14,21 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.table.TableColumn;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 public class application {
@@ -70,6 +65,8 @@ public class application {
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			g.drawString("This is the user menu for " + username, 20, 30);
+			if (isAdmin)
+				g.drawString("ADMIN", 20, 50);
 		}
 	}
 
@@ -93,7 +90,7 @@ public class application {
 			g.drawString("This is the options menu", 20, 30);
 		}
 	}
-	
+
 	private static class OtherUserMenu extends JPanel {
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
@@ -150,15 +147,94 @@ public class application {
 				break;
 			case "toUser":
 				window.setContentPane(userMenu);
-				window.setSize(300, 200);
+				window.setSize(400, 300);
 				window.setLocation(100, 100);
 				window.setVisible(true);
 				break;
 			case "toOptions":
 				window.setContentPane(optionsMenu);
-				window.setSize(300, 200);
+				window.setSize(400, 300);
 				window.setLocation(100, 100);
 				window.setVisible(true);
+				break;
+			case "deleteUser":
+				try {
+					PreparedStatement csDltChk = con
+							.prepareStatement("EXEC loginsp ?, ?");
+					csDltChk.setString(1, username);
+					csDltChk.setString(2, optionsPassField.getText());
+					ResultSet rsChk = csDltChk.executeQuery();
+					if (!rsChk.next()) {
+						throw new Exception();
+					}
+					PreparedStatement csDlt = con
+							.prepareStatement("EXEC delete_account ?, ?");
+					csDlt.setString(1, username);
+					csDlt.setString(2, username);
+					csDlt.execute();
+					System.out.println("menu");
+					window.setContentPane(mainMenu);
+					window.setSize(300, 200);
+					window.setLocation(100, 100);
+					window.setVisible(true);
+				} catch (Exception e33) {
+					changePassField.setText("Incorect Password");
+					optionsPassField.setText("");
+					e33.printStackTrace();
+				}
+				break;
+			case "changePass":
+				try {
+					PreparedStatement csPassChng = con
+							.prepareStatement("EXEC changepassword ?, ?, ?");
+					csPassChng.setString(1, username);
+					csPassChng.setString(2, optionsPassField.getText());
+					csPassChng.setString(3, changePassField.getText());
+					csPassChng.executeQuery();
+					window.setContentPane(userMenu);
+					window.setSize(400, 300);
+					window.setLocation(100, 100);
+					window.setVisible(true);
+				} catch (Exception eQD) {
+					changePassField.setText("Incorect Password");
+					optionsPassField.setText("");
+					eQD.printStackTrace();
+				}
+				break;
+			case "removeAdminOtherUser":
+				try {
+					PreparedStatement csNoGodsNoAdminsOnlyUsers = con
+							.prepareStatement("EXEC removeAdminPrivlage ?");
+					csNoGodsNoAdminsOnlyUsers.setString(1, otherUsername);
+					csNoGodsNoAdminsOnlyUsers.execute();
+					otherUserWindow.setVisible(false);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+				break;
+			case "adminOtherUser":
+				try {
+					PreparedStatement csBestowEnlightenment = con
+							.prepareStatement("EXEC adminaccount ?, ?");
+					csBestowEnlightenment.setString(1, username);
+					csBestowEnlightenment.setString(2, otherUsername);
+					csBestowEnlightenment.execute();
+					otherUserWindow.setVisible(false);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+				break;
+			case "deleteOtherUser":
+				try {
+					PreparedStatement csBurnInAFlamingPitOfDeath = con
+							.prepareStatement("EXEC delete_account ?, ?");
+					csBurnInAFlamingPitOfDeath.setString(1, username);
+					csBurnInAFlamingPitOfDeath.setString(1, otherUsername);
+					csBurnInAFlamingPitOfDeath.execute();
+					otherUserWindow.setVisible(false);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
 				break;
 			case "radio1":
 				searchType = "Leader";
@@ -211,19 +287,25 @@ public class application {
 				break;
 			case "login":
 				try {
-					CallableStatement cs = con.prepareCall("EXEC loginsp '"
-							+ userField.getText() + "', '"
-							+ passField.getText() + "'");
+					PreparedStatement cs = con
+							.prepareStatement("EXEC loginsp ?, ?");
+					cs.setString(1, userField.getText());
+					cs.setString(2, passField.getText());
 					ResultSet res = cs.executeQuery();
-					if (res.next() && res.getString(1).equals("1")) {
+					username = userField.getText();
+					if (res.next() && res.getString(1).equals(username)) {
 						username = userField.getText();
+						isAdmin = res.getBoolean(2);
 						userField.setText("");
 						passField.setText("");
 						System.out.println("You did it!");
+						System.out.println("Admin = " + isAdmin);
+						generateWindows();
 						window.setContentPane(userMenu);
-						window.setSize(300, 200);
+						window.setSize(400, 300);
 						window.setLocation(100, 100);
 						window.setVisible(true);
+						;
 					} else {
 						throw new Error();
 					}
@@ -231,25 +313,45 @@ public class application {
 					System.out.println("You failed.");
 					userField.setText("Invalid user/password");
 					passField.setText("");
+					e1.printStackTrace();
 				}
 				break;
 			case "createUser":
 				System.out.println("Woo?");
-				// TODO add user to database
+				try {
+					PreparedStatement cs;
+					if (!newPassField.getText().equals(
+							newPassConfirmField.getText())) {
+						throw new Exception();
+					}
+					cs = con.prepareStatement("EXEC CreateLogin ?, ?, ?");
+					cs.setString(1, newUserField.getText());
+					cs.setString(2, newPassConfirmField.getText());
+					cs.setString(3, emailField.getText());
+					cs.execute();
+					System.out.println("menu");
+					window.setContentPane(mainMenu);
+					window.setSize(300, 200);
+					window.setLocation(100, 100);
+					window.setVisible(true);
+				} catch (Exception e3) {
+					newUserField.setText("Invalid information");
+					newPassField.setText("");
+					newPassConfirmField.setText("");
+					emailField.setText("");
+					e3.printStackTrace();
+				}
 				break;
 			case "search":
-				CallableStatement cs;
+				PreparedStatement cs;
 				if (searchType.equals("Leader")) {
 					try {
-						cs = con.prepareCall("SELECT * FROM LEADER l INNER JOIN AVERAGELEADERRATING r"
+						cs = con.prepareStatement("SELECT * FROM LEADER l INNER JOIN AVERAGELEADERRATING r"
 								+ " ON l.fname = r.fname AND l.midint = r.midint AND l.lname = r.lname"
-								+ " WHERE l.fname ='"
-								+ searchFieldF.getText()
-								+ "' AND"
-								+ " l.midint ='"
-								+ searchFieldM.getText()
-								+ "' AND"
-								+ " l.lname ='" + searchFieldL.getText() + "'");
+								+ " WHERE l.fname = ? AND l.midint = ? AND l.lname = ?");
+						cs.setString(1, searchFieldF.getText());
+						cs.setString(2, searchFieldM.getText());
+						cs.setString(3, searchFieldL.getText());
 						ResultSet res = cs.executeQuery();
 						currLeader = searchFieldF.getText() + " "
 								+ searchFieldM.getText() + " "
@@ -261,18 +363,22 @@ public class application {
 						System.out.println(leaderID + " : " + currLeader);
 						leaderMenu = new JPanel();
 						JPanel leaderPanel = new LeaderMenu();
-						leaderMenu.setLayout(new BoxLayout(leaderMenu, BoxLayout.Y_AXIS));
+						leaderMenu.setLayout(new BoxLayout(leaderMenu,
+								BoxLayout.Y_AXIS));
 						leaderMenu.add(leaderPanel);
-						cs = con.prepareCall("SELECT username FROM RATING "
-								+ "WHERE username = '" + searchFieldF.getText() + "' "
-										+ "AND leader_id = " + leaderID);
+						cs = con.prepareStatement("SELECT username FROM RATING "
+								+ "WHERE username = ? AND leader_id = ?");
+						cs.setString(1, username);
+						cs.setInt(2, leaderID);
 						ResultSet res2 = cs.executeQuery();
-						if(!res2.next()) {
+						if (!res2.next()) {
 							JPanel option = new JPanel(new GridLayout(1, 0));
 							ButtonGroup group = new ButtonGroup();
-							for(int x = 0; x <= 10; x++) {
-								JRadioButton tempButton = new JRadioButton("" + x);
-								ButtonHandler tempListener = new ButtonHandler("rate" + x);
+							for (int x = 0; x <= 10; x++) {
+								JRadioButton tempButton = new JRadioButton(""
+										+ x);
+								ButtonHandler tempListener = new ButtonHandler(
+										"rate" + x);
 								tempButton.addActionListener(tempListener);
 								group.add(tempButton);
 								option.add(tempButton);
@@ -283,21 +389,24 @@ public class application {
 							rating.setVisible(true);
 							leaderMenu.add(Box.createVerticalGlue());
 							JButton rateButton = new JButton("Rate");
-							ButtonHandler rateListener = new ButtonHandler("rate");
+							ButtonHandler rateListener = new ButtonHandler(
+									"rate");
 							rateButton.addActionListener(rateListener);
 							leaderMenu.add(rateButton);
 						}
 						JButton exitButton = new JButton("Close");
-						ButtonHandler exitListener = new ButtonHandler("exitWindowLeader");
+						ButtonHandler exitListener = new ButtonHandler(
+								"exitWindowLeader");
 						exitButton.addActionListener(exitListener);
 						leaderMenu.add(exitButton);
 						leaderWindow = new JFrame(currLeader);
-						cs = con.prepareCall("SELECT username, rating, txt FROM UserRatings "
-								+ "WHERE leader_id = " + leaderID);
+						cs = con.prepareStatement("SELECT username, rating, txt FROM UserRatings "
+								+ "WHERE leader_id = ?");
+						cs.setInt(1, leaderID);
 						ResultSet res3 = cs.executeQuery();
-						String[] columnNames = {"Username", "Rating", "Text"};
+						String[] columnNames = { "Username", "Rating", "Text" };
 						ArrayList<String[]> dataArrayList = new ArrayList<String[]>();
-						while(res3.next()) {
+						while (res3.next()) {
 							String[] temp = new String[3];
 							temp[0] = res3.getString(1);
 							temp[1] = res3.getString(2);
@@ -305,13 +414,13 @@ public class application {
 							dataArrayList.add(temp);
 						}
 						String[][] data = new String[dataArrayList.size()][3];
-						for(int x = 0; x < dataArrayList.size(); x++)
-						{
+						for (int x = 0; x < dataArrayList.size(); x++) {
 							data[x] = dataArrayList.get(x);
 						}
 						JTable table = new JTable(data, columnNames);
 						JScrollPane scrollPane = new JScrollPane(table);
-						table.setPreferredScrollableViewportSize(new Dimension(300, 100));
+						table.setPreferredScrollableViewportSize(new Dimension(
+								300, 100));
 						leaderMenu.add(scrollPane);
 						leaderWindow.setContentPane(leaderMenu);
 						leaderWindow.setSize(500, 400);
@@ -324,30 +433,70 @@ public class application {
 					}
 				} else if (searchType.equals("User")) {
 					try {
-						cs = con.prepareCall("SELECT username, lname, rating FROM UserRatings "
-								+ "WHERE username = '" + searchFieldF.getText() + "'");
-						ResultSet res = cs.executeQuery();
-						if (!res.next()) {
+						cs = con.prepareStatement("SELECT * FROM USER_ACCOUNT WHERE username = ?");
+						cs.setString(1, searchFieldF.getText());
+						ResultSet resUser = cs.executeQuery();
+						if (!resUser.next()) {
 							throw new Exception();
 						}
-						System.out.println();
+						cs = con.prepareStatement("SELECT username, lname, rating FROM UserRatings "
+								+ "WHERE username = ?");
+						cs.setString(1, searchFieldF.getText());
+						cs.executeQuery();
 						otherUsername = searchFieldF.getText();
 						System.out.println(otherUsername);
 						otherUserMenu = new JPanel();
-						otherUserMenu.setLayout(new BoxLayout(otherUserMenu, BoxLayout.Y_AXIS));
+						otherUserMenu.setLayout(new BoxLayout(otherUserMenu,
+								BoxLayout.Y_AXIS));
 						JPanel otherUserPanel = new OtherUserMenu();
 						otherUserMenu.add(otherUserPanel);
 						JButton exitButton6 = new JButton("Close");
-						ButtonHandler exitListener6 = new ButtonHandler("exitWindowUser");
+						ButtonHandler exitListener6 = new ButtonHandler(
+								"exitWindowUser");
 						exitButton6.addActionListener(exitListener6);
 						otherUserMenu.add(exitButton6);
+						if (isAdmin) {
+							JPanel adminOptions = new JPanel();
+							adminOptions.setLayout(new GridLayout(1, 0));
+							JButton deleteUserButton = new JButton(
+									"Delete User");
+							ButtonHandler deleteUserListener = new ButtonHandler(
+									"deleteOtherUser");
+							deleteUserButton
+									.addActionListener(deleteUserListener);
+							adminOptions.add(deleteUserButton);
+							cs = con.prepareStatement("SELECT administrator FROM USER_ACCOUNT "
+									+ "WHERE username = ?");
+							cs.setString(1, otherUsername);
+							ResultSet res78 = cs.executeQuery();
+							if (res78.next() && res78.getBoolean(1)) {
+								JButton removeAdminUserButton = new JButton(
+										"Un-Admin-ify User");
+								ButtonHandler removeAdminUserListener = new ButtonHandler(
+										"removeAdminOtherUser");
+								removeAdminUserButton
+										.addActionListener(removeAdminUserListener);
+								adminOptions.add(removeAdminUserButton);
+							} else {
+								JButton adminUserButton = new JButton(
+										"Admin-ify User");
+								ButtonHandler adminUserListener = new ButtonHandler(
+										"adminOtherUser");
+								adminUserButton
+										.addActionListener(adminUserListener);
+								adminOptions.add(adminUserButton);
+							}
+							otherUserMenu.add(adminOptions);
+						}
 						otherUserWindow = new JFrame(otherUsername);
-						cs = con.prepareCall("SELECT fname, midint, lname, rating, txt FROM UserRatings "
-								+ "WHERE username = '" + otherUsername + "'");
+						cs = con.prepareStatement("SELECT fname, midint, lname, rating, txt FROM UserRatings "
+								+ "WHERE username = ?");
+						cs.setString(1, otherUsername);
 						ResultSet res3 = cs.executeQuery();
-						String[] columnNames = {"First Name", "Middle Initial", "Last Name", "Rating", "Text"};
+						String[] columnNames = { "First Name",
+								"Middle Initial", "Last Name", "Rating", "Text" };
 						ArrayList<String[]> dataArrayList = new ArrayList<String[]>();
-						while(res3.next()) {
+						while (res3.next()) {
 							String[] temp = new String[5];
 							temp[0] = res3.getString(1);
 							temp[1] = res3.getString(2);
@@ -357,13 +506,13 @@ public class application {
 							dataArrayList.add(temp);
 						}
 						String[][] data = new String[dataArrayList.size()][3];
-						for(int x = 0; x < dataArrayList.size(); x++)
-						{
+						for (int x = 0; x < dataArrayList.size(); x++) {
 							data[x] = dataArrayList.get(x);
 						}
 						JTable table = new JTable(data, columnNames);
 						JScrollPane scrollPane = new JScrollPane(table);
-						table.setPreferredScrollableViewportSize(new Dimension(300, 100));
+						table.setPreferredScrollableViewportSize(new Dimension(
+								300, 100));
 						otherUserMenu.add(scrollPane);
 						otherUserWindow.setContentPane(otherUserMenu);
 						otherUserWindow.setSize(500, 400);
@@ -378,7 +527,56 @@ public class application {
 				}
 				break;
 			case "rate":
-				//TODO make rating add to database
+				PreparedStatement cs2;
+				try {
+					cs2 = con.prepareStatement("EXEC addRating ?, ?, ?, ?");
+					cs2.setInt(1, leaderID);
+					cs2.setString(2, username);
+					cs2.setString(3, numRating);
+					cs2.setString(4, rating.getText());
+					cs2.execute();
+					leaderWindow.setVisible(false);
+					leaderMenu = new JPanel();
+					JPanel leaderPanel = new LeaderMenu();
+					leaderMenu.setLayout(new BoxLayout(leaderMenu,
+							BoxLayout.Y_AXIS));
+					leaderMenu.add(leaderPanel);
+					JButton exitButton = new JButton("Close");
+					ButtonHandler exitListener = new ButtonHandler(
+							"exitWindowLeader");
+					exitButton.addActionListener(exitListener);
+					leaderMenu.add(exitButton);
+					leaderWindow = new JFrame(currLeader);
+					cs = con.prepareStatement("SELECT username, rating, txt FROM UserRatings "
+							+ "WHERE leader_id = ?");
+					cs.setInt(1, leaderID);
+					ResultSet res3 = cs.executeQuery();
+					String[] columnNames = { "Username", "Rating", "Text" };
+					ArrayList<String[]> dataArrayList = new ArrayList<String[]>();
+					while (res3.next()) {
+						String[] temp = new String[3];
+						temp[0] = res3.getString(1);
+						temp[1] = res3.getString(2);
+						temp[2] = res3.getString(3);
+						dataArrayList.add(temp);
+					}
+					String[][] data = new String[dataArrayList.size()][3];
+					for (int x = 0; x < dataArrayList.size(); x++) {
+						data[x] = dataArrayList.get(x);
+					}
+					JTable table = new JTable(data, columnNames);
+					JScrollPane scrollPane = new JScrollPane(table);
+					table.setPreferredScrollableViewportSize(new Dimension(300,
+							100));
+					leaderMenu.add(scrollPane);
+					leaderWindow.setContentPane(leaderMenu);
+					leaderWindow.setSize(500, 400);
+					leaderWindow.setLocation(110, 110);
+					leaderWindow.setVisible(true);
+				} catch (SQLException e1) {
+					rating.setText("An error occured");
+					e1.printStackTrace();
+				}
 				break;
 			}
 
@@ -396,6 +594,7 @@ public class application {
 	static JPanel createUserMenu = new JPanel();
 	static JPanel leaderMenu = new JPanel();
 	static JPanel otherUserMenu = new JPanel();
+	static JPanel adminUserMenu = new JPanel();
 	static JFrame window;
 	static JFrame leaderWindow;
 	static JFrame otherUserWindow;
@@ -409,6 +608,7 @@ public class application {
 	static JTextField newPassConfirmField = new JTextField();
 	static JTextArea rating = new JTextArea();
 	static JTextField optionsPassField = new JPasswordField();
+	static JTextField changePassField = new JTextField();
 	static String currLeader = "";
 	static int leaderID;
 	static JTextField searchFieldF = new JTextField();
@@ -416,6 +616,7 @@ public class application {
 	static JTextField searchFieldL = new JTextField();
 	static String searchType = "Leader";
 	static String numRating = "0";
+	static private Boolean isAdmin = false;
 
 	public static void main(String[] args) {
 
@@ -426,9 +627,6 @@ public class application {
 		// Create all the panels upon startup
 		JPanel menuPanel = new MainMenu();
 		JPanel loginPanel = new LoginMenu();
-		JPanel userPanel = new UserMenu();
-		JPanel searchPanel = new SearchMenu();
-		JPanel optionsPanel = new OptionsMenu();
 		JPanel createUserPanel = new CreateUserMenu();
 
 		// Create Menu Panel
@@ -466,24 +664,6 @@ public class application {
 		loginButton2.addActionListener(loginListener2);
 		loginMenu.add(loginButton2);
 
-		// Create User Menu
-		userMenu = new JPanel();
-		userMenu.setLayout(new BoxLayout(userMenu, BoxLayout.Y_AXIS));
-		userMenu.add(userPanel);
-		userMenu.add(Box.createVerticalGlue());
-		JButton searchButton = new JButton("Search");
-		ButtonHandler searchListener = new ButtonHandler("toSearch");
-		searchButton.addActionListener(searchListener);
-		userMenu.add(searchButton);
-		JButton optionsButton = new JButton("Options");
-		ButtonHandler optionsListener = new ButtonHandler("toOptions");
-		optionsButton.addActionListener(optionsListener);
-		userMenu.add(optionsButton);
-		JButton logoutButton = new JButton("Logout");
-		ButtonHandler logoutListener = new ButtonHandler("toMenu");
-		logoutButton.addActionListener(logoutListener);
-		userMenu.add(logoutButton);
-
 		// Create createUser Menu
 		createUserMenu = new JPanel();
 		createUserMenu
@@ -506,6 +686,53 @@ public class application {
 		ButtonHandler backListener = new ButtonHandler("toMenu");
 		backButton.addActionListener(backListener);
 		createUserMenu.add(backButton);
+
+		// Generate Window
+		window = new JFrame("Rate My World Leader");
+		window.setContentPane(mainMenu);
+		window.setSize(300, 200);
+		window.setLocation(100, 100);
+		window.setVisible(true);
+
+	}
+
+	private static void connectToDatabase() {
+		String host = "jdbc:sqlserver://titan.csse.rose-hulman.edu;databaseName=RateYourWorldLeader";
+		Properties connectionProps = new Properties();
+		connectionProps.put("user", "hamiltjc");
+		connectionProps.put("password", "moom1232");
+		try {
+			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			con = DriverManager.getConnection(host, connectionProps);
+			statement = con.createStatement();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.exit(0);
+		}
+	}
+
+	private static void generateWindows() {
+		JPanel userPanel = new UserMenu();
+		JPanel searchPanel = new SearchMenu();
+		JPanel optionsPanel = new OptionsMenu();
+
+		// Create User Menu
+		userMenu = new JPanel();
+		userMenu.setLayout(new BoxLayout(userMenu, BoxLayout.Y_AXIS));
+		userMenu.add(userPanel);
+		userMenu.add(Box.createVerticalGlue());
+		JButton searchButton = new JButton("Search");
+		ButtonHandler searchListener = new ButtonHandler("toSearch");
+		searchButton.addActionListener(searchListener);
+		userMenu.add(searchButton);
+		JButton optionsButton = new JButton("Options");
+		ButtonHandler optionsListener = new ButtonHandler("toOptions");
+		optionsButton.addActionListener(optionsListener);
+		userMenu.add(optionsButton);
+		JButton logoutButton = new JButton("Logout");
+		ButtonHandler logoutListener = new ButtonHandler("toMenu");
+		logoutButton.addActionListener(logoutListener);
+		userMenu.add(logoutButton);
 
 		// Create Search Menu
 		searchMenu = new JPanel();
@@ -541,53 +768,26 @@ public class application {
 		searchMenu.add(backButton2);
 
 		// Create Options Menu
-		// TODO give the user ability to change password or delete account
 		optionsMenu = new JPanel();
 		optionsMenu.setLayout(new BoxLayout(optionsMenu, BoxLayout.Y_AXIS));
 		optionsMenu.add(optionsPanel);
 		optionsMenu.add(optionsPassField);
 		optionsPassField.setMaximumSize(new Dimension(300, 15));
+		optionsMenu.add(changePassField);
+		changePassField.setMaximumSize(new Dimension(300, 15));
+		changePassField.setText("New Password");
 		optionsMenu.add(Box.createVerticalGlue());
 		JButton deleteButton = new JButton("Delete User");
 		ButtonHandler deleteListener = new ButtonHandler("deleteUser");
 		deleteButton.addActionListener(deleteListener);
 		optionsMenu.add(deleteButton);
+		JButton changeButton = new JButton("Change Password");
+		ButtonHandler changeListener = new ButtonHandler("changePass");
+		changeButton.addActionListener(changeListener);
+		optionsMenu.add(changeButton);
 		JButton backButton3 = new JButton("Back");
 		ButtonHandler backListener3 = new ButtonHandler("toUser");
 		backButton3.addActionListener(backListener3);
 		optionsMenu.add(backButton3);
-
-		// Create adminUser Menu
-		// TODO same as user, but has extra options
-
-		// Create adminOptions Menu
-		// TODO has extra options for admin
-
-		// Create adminOtherUser Menu
-		// TODO extra options for admin
-
-		// Generate Window
-		window = new JFrame("Rate My World Leader");
-		window.setContentPane(mainMenu);
-		window.setSize(300, 200);
-		window.setLocation(100, 100);
-		window.setVisible(true);
-
-	}
-
-	private static void connectToDatabase() {
-		String host = "jdbc:sqlserver://titan.csse.rose-hulman.edu;databaseName=RateYourWorldLeader";
-		Properties connectionProps = new Properties();
-		connectionProps.put("user", "hamiltjc");
-		connectionProps.put("password", "moom1232");
-		try {
-			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			con = DriverManager.getConnection(host, connectionProps);
-			statement = con.createStatement();
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			System.exit(0);
-		}
-
 	}
 }
